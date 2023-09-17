@@ -1,0 +1,45 @@
+# The main file using functions to get ASX uptrending&consolidating, buy and sell lists
+# In project format so use relative paths to directories not absolute
+# created 2/12/2022
+# mostly functional, only tested with gettickersfromfile function not stockdatagetter
+# converted to Rexec file
+
+#print(getwd())
+
+
+source("scripts/getstockdatafromfile.R")   # to load ticker xts into global enviroment using gettickersfromfile() function
+source("scripts/quantstratmyfunctions.R")  # file that contains home made functions used by quantstrat, BBandsPC etc
+source("scripts/uptrendconsolidating.R")   # for function ASXUpCondFunction()
+source("scripts/buylist.R")                 # for function buylist()
+source("scripts/selllistfunction.R")  # for selllistfunction() take a portfolio dateframe containing tickers and the buyprice in column 4
+source("scripts/stockdatagetter.R")
+
+c_valid_stocks<-readRDS("ProgFiles/asx_valid_stocks")
+
+# To load ticker data from file and append new data from yahoo
+###################################################################
+GetTickerXTS(c_valid_stocks)                                      #
+###################################################################
+
+# To load ticker data xts from file, for testing only  
+###################################################################
+#gettickersfromfile(c_valid_stocks)                                #
+###################################################################
+
+
+UptrendCond<-ASXUpCondFunction(c_valid_stocks)
+View(UptrendCond)
+
+#setwd("C:/Users/PeaSee/Documents/TradeData/ASX/Buydata") 
+valid_stocks<-readRDS("Buydata/UptrendConsolidationTickers.rds")  # get data frame from file RecBuy.rds created in ASXUpCondFunction
+valid_stocks<-valid_stocks$Ticker  # transform dataframe into a list of tickers for buy list function
+#print(valid_stocks)
+#print(typeof(valid_stocks))
+
+BuyList<-buylist(valid_stocks)
+View(BuyList)
+
+PortfolioList<-readRDS("ProgFiles/Portfolio.rds")  # load the portfolio.rds into dataframe for sellistfunction
+
+SellList<-selllistfunction(PortfolioList)
+View(SellList)
